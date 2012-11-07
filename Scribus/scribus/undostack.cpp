@@ -28,16 +28,53 @@ for which a new license (GPL+exception) is in place.
 #include "undoobject.h"
 #include "undostack.h"
 
+
+#include "prefsmanager.h"
+#include <QDebug>
+
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QUrl>
+
 UndoStack::UndoStack(int maxSize) : maxSize_(maxSize)
 {
 
 }
+
+QNetworkAccessManager *plo_manager = new QNetworkAccessManager;
 
 bool UndoStack::action(UndoState *state)
 {
     redoActions_.clear();
     undoActions_.insert(undoActions_.begin(), state);
     bool needsPopping = checkSize(); // only store maxSize_ amount of actions
+
+    qDebug()<<state->getName()<<state->getDescription();
+//    QNetworkAccessManager manager;
+
+    if(plo_manager->networkAccessible())
+    {
+	    QUrl url;
+	    url.setScheme("http");
+//	    url.setHost(QString("10.0.1.23"));
+
+	    url.setHost(QString(PrefsManager::instance()->extBrowserExecutable()));
+	    url.setPort(2342);
+//	    QList<QPair<QString, QString> > query;
+//	    query << QPair<QString, QString>("action", state->getName());
+//	    query << QPair<QString, QString>("instrument", "scribus");
+//	    url.setQueryItems(query);
+	    url.setPath(QString("/%1/%2").arg("scribus").arg(state->getName()));
+	    qDebug()<<url;
+	    QNetworkRequest request(url);
+
+	   plo_manager->get(request);
+    }
+    else
+    {
+	    qDebug()<<"Network is not available";
+    }
 
     return needsPopping;
 }
