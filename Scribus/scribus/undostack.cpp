@@ -33,9 +33,7 @@ for which a new license (GPL+exception) is in place.
 #include <QDebug>
 
 #include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QUrl>
+#include <QProcess>
 
 UndoStack::UndoStack(int maxSize) : maxSize_(maxSize)
 {
@@ -51,7 +49,6 @@ bool UndoStack::action(UndoState *state)
     bool needsPopping = checkSize(); // only store maxSize_ amount of actions
 
     qDebug()<<state->getName()<<state->getDescription();
-//    QNetworkAccessManager manager;
 
     if(plo_manager->networkAccessible())
     {
@@ -61,15 +58,14 @@ bool UndoStack::action(UndoState *state)
         QString p = (l.size() >= 2) ? l.at(1) : QString("1234");
         int portNumber = p.toInt();
 
-        QUrl url;
-        url.setScheme("http");
-        url.setHost(host);
-        url.setPort(portNumber);
-        url.setPath(QString("/%1/%2").arg("scribus").arg(state->getName()));
-        qDebug()<<url;
-        QNetworkRequest request(url);
-
-        plo_manager->get(request);
+        // XXX: uses helper binary to send OSC message to PLO server
+        QStringList args;
+        args << "scribus";
+        args << state->getName();
+        int retval = QProcess::execute("plo-send-action.py", args);
+        if (retval != 0) {
+            qDebug() << "PLO helper failed.";
+        }
     }
     else
     {
