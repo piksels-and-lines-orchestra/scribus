@@ -55,21 +55,21 @@ bool UndoStack::action(UndoState *state)
 
     if(plo_manager->networkAccessible())
     {
-	    QUrl url;
-	    url.setScheme("http");
-//	    url.setHost(QString("10.0.1.23"));
+        QString ploServer = QString::fromUtf8(qgetenv("PLO_SERVER"));
+        QStringList l = ploServer.split(":");
+        QString host = (l.size() >= 1) ? l.at(0) : QString("127.0.0.1");
+        QString p = (l.size() >= 2) ? l.at(1) : QString("1234");
+        int portNumber = p.toInt();
 
-	    url.setHost(QString(PrefsManager::instance()->extBrowserExecutable()));
-	    url.setPort(2342);
-//	    QList<QPair<QString, QString> > query;
-//	    query << QPair<QString, QString>("action", state->getName());
-//	    query << QPair<QString, QString>("instrument", "scribus");
-//	    url.setQueryItems(query);
-	    url.setPath(QString("/%1/%2").arg("scribus").arg(state->getName()));
-	    qDebug()<<url;
-	    QNetworkRequest request(url);
+        QUrl url;
+        url.setScheme("http");
+        url.setHost(host);
+        url.setPort(portNumber);
+        url.setPath(QString("/%1/%2").arg("scribus").arg(state->getName()));
+        qDebug()<<url;
+        QNetworkRequest request(url);
 
-	   plo_manager->get(request);
+        plo_manager->get(request);
     }
     else
     {
