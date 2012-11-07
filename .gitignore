@@ -1,1 +1,15 @@
 sys$command
+ui_*.h
+moc_*.cxx
+Makefile
+*.so
+*.a
+cmake_install.cmake
+cmake_uninstall.cmake
+CMakeFiles
+*.qm
+CMakeCache.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
+config.h
+Scribus/scribus/scribus
